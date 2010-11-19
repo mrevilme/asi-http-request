@@ -64,12 +64,17 @@ typedef enum _ASIPostFormat {
 // Same as above, but you can specify the content-type and file name
 - (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key;
 
+// Same as above, but you can specify the content-disposition
+- (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key contentDisposition:(NSString *)contentDisposition;
+
 // Add the contents of an NSData object to the request, clearing any others with the same key
 - (void)setData:(NSData *)data forKey:(NSString *)key;
 
 // Same as above, but you can specify the content-type and file name
 - (void)setData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key;
 
+// Same as above, but you can specify the content-disposition
+- (void)setData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key contentDisposition:(NSString *)contentDisposition;
 
 @property (assign) ASIPostFormat postFormat;
 @property (assign) NSStringEncoding stringEncoding;

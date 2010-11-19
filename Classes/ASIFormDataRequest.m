@@ -129,7 +129,7 @@
 		}
 	}
 	
-	NSDictionary *fileInfo = [NSDictionary dictionaryWithObjectsAndKeys:data, @"data", contentType, @"contentType", fileName, @"fileName", key, @"key", nil];
+	NSDictionary *fileInfo = [NSDictionary dictionaryWithObjectsAndKeys:data, @"data", contentType, @"contentType", fileName, @"fileName", key, @"key", @"attachment", @"contentDisposition", nil];
 	[[self fileData] addObject:fileInfo];
 }
 
@@ -158,7 +158,7 @@
 	[self addData:data withFileName:@"file" andContentType:nil forKey:key];
 }
 
-- (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key
+- (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key contentDisposition:(NSString *)contentDisposition
 {
 	if (![self fileData]) {
 		[self setFileData:[NSMutableArray array]];
@@ -167,8 +167,13 @@
 		contentType = @"application/octet-stream";
 	}
 	
-	NSDictionary *fileInfo = [NSDictionary dictionaryWithObjectsAndKeys:data, @"data", contentType, @"contentType", fileName, @"fileName", key, @"key", nil];
+	NSDictionary *fileInfo = [NSDictionary dictionaryWithObjectsAndKeys:data, @"data", contentType, @"contentType", fileName, @"fileName", key, @"key", contentDisposition, @"contentDisposition", nil];
 	[[self fileData] addObject:fileInfo];
+}
+
+- (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key
+{
+	[self addData:data withFileName:fileName andContentType:contentType forKey:key contentDisposition:];
 }
 
 - (void)setData:(NSData *)data forKey:(NSString *)key
@@ -177,6 +182,11 @@
 }
 
 - (void)setData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key
+{
+    [self setData:data withFileName:fileName andContentType:contentType forKey:key contentDisposition:@"form-data"];
+}
+
+- (void)setData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key contentDisposition:(NSString *)contentDisposition
 {
 	// Remove any existing value
 	NSUInteger i;
@@ -187,7 +197,7 @@
 			i--;
 		}
 	}
-	[self addData:data withFileName:fileName andContentType:contentType forKey:key];
+	[self addData:data withFileName:fileName andContentType:contentType forKey:key contentDisposition:contentDisposition];
 }
 
 - (void)buildPostBody
