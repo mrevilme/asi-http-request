@@ -830,7 +830,7 @@ static NSOperationQueue *sharedQueue = nil;
 					{
 						[[UIApplication sharedApplication] endBackgroundTask:backgroundTask];
 						backgroundTask = UIBackgroundTaskInvalid;
-						[self cancel];
+						[self clearDelegatesAndCancel];
 					}
 				});
 			}];
