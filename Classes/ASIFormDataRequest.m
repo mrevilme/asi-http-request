@@ -173,7 +173,7 @@
 
 - (void)addData:(id)data withFileName:(NSString *)fileName andContentType:(NSString *)contentType forKey:(NSString *)key
 {
-	[self addData:data withFileName:fileName andContentType:contentType forKey:key contentDisposition:];
+	[self addData:data withFileName:fileName andContentType:contentType forKey:key contentDisposition:nil];
 }
 
 - (void)setData:(NSData *)data forKey:(NSString *)key

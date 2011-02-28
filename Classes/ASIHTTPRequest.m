@@ -420,6 +420,11 @@ static NSOperationQueue *sharedQueue = nil;
 		[startedBlock release];
 		startedBlock = nil;
 	}
+    if (cachedBlock) {
+        [blocks addObject: cachedBlock];
+        [cachedBlock release];
+        cachedBlock = nil;
+    }
 	if (headersReceivedBlock) {
 		[blocks addObject:headersReceivedBlock];
 		[headersReceivedBlock release];
@@ -895,6 +900,38 @@ static NSOperationQueue *sharedQueue = nil;
 				[self useDataFromCache];
 				return;
 			}
+            
+            // If we should try using cached data before doing a download, lets load th
+            if ([self cachePolicy] & ASIUseCachedContentFirstThenDownload) 
+            {
+                
+                NSDictionary *headers = [[self downloadCache] cachedResponseHeadersForURL:[self url]];
+                NSString *dataPath = [[self downloadCache] pathToCachedResponseDataForURL:[self url]];
+                
+                if (headers && dataPath) {
+                    
+                    // only 200 responses are stored in the cache, so let the client know
+                    // this was a successful response
+                    [self setResponseStatusCode:200];
+                    
+                    [self setDidUseCachedResponse:NO];
+                    [self setResponseHeaders:headers];
+                    
+                    if ([self downloadDestinationPath]) {
+                        [self setDownloadDestinationPath:dataPath];
+                    } else {
+                        [self setRawResponseData:[NSMutableData dataWithData:[[self downloadCache] cachedResponseDataForURL:[self url]]]];
+                    }
+                    [self setContentLength:[[[self responseHeaders] objectForKey:@"Content-Length"] longLongValue]];
+                    [self setTotalBytesRead:[self contentLength]];
+                    
+                    [self parseStringEncodingFromHeaders];
+                    
+                    [self setResponseCookies:[NSHTTPCookie cookiesWithResponseHeaderFields:headers forURL:[self url]]];
+                    [self performSelectorOnMainThread:@selector(reportCached) withObject:nil waitUntilDone:[NSThread isMainThread]];
+                }                        
+                
+            }
 
 			// If cached data is stale, or we have been told to ask the server if it has been modified anyway, we need to add headers for a conditional GET
 			if ([self cachePolicy] & (ASIAskServerIfModifiedWhenStaleCachePolicy|ASIAskServerIfModifiedCachePolicy)) {
@@ -1949,6 +1986,15 @@ static NSOperationQueue *sharedQueue = nil;
 #if NS_BLOCKS_AVAILABLE
 	if(completionBlock){
 		completionBlock();
+	}
+#endif
+}
+
+- (void) reportCached
+{
+#if NS_BLOCKS_AVAILABLE
+	if(cachedBlock){
+		cachedBlock();
 	}
 #endif
 }
@@ -4611,6 +4657,11 @@ static NSOperationQueue *sharedQueue = nil;
 	startedBlock = [aStartedBlock copy];
 }
 
+- (void) setCachedBlock: (ASIBasicBlock) aCachedBlock
+{
+    [cachedBlock release];
+    cachedBlock = [aCachedBlock copy];
+}
 - (void)setHeadersReceivedBlock:(ASIHeadersBlock)aReceivedBlock
 {
 	[headersReceivedBlock release];

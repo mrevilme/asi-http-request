@@ -38,7 +38,11 @@ typedef enum _ASICachePolicy {
 	ASIDontLoadCachePolicy = 32,
 
 	// Specifies that cached data may be used if the request fails. If cached data is used, the request will succeed without error. Usually used in combination with other options above.
-	ASIFallbackToCacheIfLoadFailsCachePolicy = 64
+	ASIFallbackToCacheIfLoadFailsCachePolicy = 64,
+    
+    // Specifies that we will first send the cached copy of the info if we have it, and then download it.
+    ASIUseCachedContentFirstThenDownload = 128
+    
 } ASICachePolicy;
 
 // Cache storage policies control whether cached data persists between application launches (ASICachePermanentlyCacheStoragePolicy) or not (ASICacheForSessionDurationCacheStoragePolicy)

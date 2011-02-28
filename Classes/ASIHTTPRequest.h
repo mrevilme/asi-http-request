@@ -500,6 +500,9 @@ typedef void (^ASIDataBlock)(NSData *data);
 	#if NS_BLOCKS_AVAILABLE
 	//block to execute when request starts
 	ASIBasicBlock startedBlock;
+    
+    //block to execute when sending cached response
+    ASIBasicBlock cachedBlock;
 
 	//block to execute when headers are received
 	ASIHeadersBlock headersReceivedBlock;
@@ -549,6 +552,7 @@ typedef void (^ASIDataBlock)(NSData *data);
 
 #if NS_BLOCKS_AVAILABLE
 - (void)setStartedBlock:(ASIBasicBlock)aStartedBlock;
+- (void)setCachedBlock: (ASIBasicBlock) aCachedBlock;
 - (void)setHeadersReceivedBlock:(ASIHeadersBlock)aReceivedBlock;
 - (void)setCompletionBlock:(ASIBasicBlock)aCompletionBlock;
 - (void)setFailedBlock:(ASIBasicBlock)aFailedBlock;
