@@ -909,26 +909,27 @@ static NSOperationQueue *sharedQueue = nil;
                 NSString *dataPath = [[self downloadCache] pathToCachedResponseDataForURL:[self url]];
                 
                 if (headers && dataPath) {
-                    
+                    ASIHTTPRequest *req = [[self copy] autorelease];
                     // only 200 responses are stored in the cache, so let the client know
                     // this was a successful response
-                    [self setResponseStatusCode:200];
+                    [req setResponseStatusCode:200];
                     
-                    [self setDidUseCachedResponse:NO];
-                    [self setResponseHeaders:headers];
+                    [req setDidUseCachedResponse:NO];
+                    [req setResponseHeaders:headers];
                     
-                    if ([self downloadDestinationPath]) {
-                        [self setDownloadDestinationPath:dataPath];
+                    if ([req downloadDestinationPath]) {
+                        [req setDownloadDestinationPath:dataPath];
                     } else {
-                        [self setRawResponseData:[NSMutableData dataWithData:[[self downloadCache] cachedResponseDataForURL:[self url]]]];
+                        [req setRawResponseData:[NSMutableData dataWithData:[[req downloadCache] cachedResponseDataForURL:[req url]]]];
                     }
-                    [self setContentLength:[[[self responseHeaders] objectForKey:@"Content-Length"] longLongValue]];
-                    [self setTotalBytesRead:[self contentLength]];
+                    [req setContentLength:[[[req responseHeaders] objectForKey:@"Content-Length"] longLongValue]];
+                    [req setTotalBytesRead:[req contentLength]];
                     
-                    [self parseStringEncodingFromHeaders];
+                    [req parseStringEncodingFromHeaders];
                     
-                    [self setResponseCookies:[NSHTTPCookie cookiesWithResponseHeaderFields:headers forURL:[self url]]];
-                    [self performSelectorOnMainThread:@selector(reportCached) withObject:nil waitUntilDone:[NSThread isMainThread]];
+                    [req setResponseCookies:[NSHTTPCookie cookiesWithResponseHeaderFields:headers forURL:[req url]]];
+                    
+                    [req performSelectorOnMainThread:@selector(reportCached) withObject:nil waitUntilDone:[NSThread isMainThread]];
                 }                        
                 
             }
@@ -1994,7 +1995,7 @@ static NSOperationQueue *sharedQueue = nil;
 {
 #if NS_BLOCKS_AVAILABLE
 	if(cachedBlock){
-		cachedBlock();
+		cachedBlock(self);
 	}
 #endif
 }
@@ -3913,6 +3914,21 @@ static NSOperationQueue *sharedQueue = nil;
 	[newRequest setShouldUseRFC2616RedirectBehaviour:[self shouldUseRFC2616RedirectBehaviour]];
 	[newRequest setShouldAttemptPersistentConnection:[self shouldAttemptPersistentConnection]];
 	[newRequest setPersistentConnectionTimeoutSeconds:[self persistentConnectionTimeoutSeconds]];
+#if NS_BLOCKS_AVAILABLE
+    [newRequest setStartedBlock:startedBlock];
+    [newRequest setCachedBlock:cachedBlock];
+    [newRequest setCompletionBlock:completionBlock];
+    [newRequest setHeadersReceivedBlock:headersReceivedBlock];
+    [newRequest setFailedBlock:failureBlock];
+    [newRequest setBytesReceivedBlock:bytesReceivedBlock];
+    [newRequest setBytesSentBlock:bytesSentBlock];
+    [newRequest setDownloadSizeIncrementedBlock:downloadSizeIncrementedBlock];
+    [newRequest setUploadSizeIncrementedBlock:uploadSizeIncrementedBlock];
+    [newRequest setDataReceivedBlock:dataReceivedBlock];
+    [newRequest setAuthenticationNeededBlock:authenticationNeededBlock];
+    [newRequest setProxyAuthenticationNeededBlock:proxyAuthenticationNeededBlock];
+    [newRequest setRequestRedirectedBlock:requestRedirectedBlock];
+#endif
 	return newRequest;
 }
 
@@ -4657,7 +4673,7 @@ static NSOperationQueue *sharedQueue = nil;
 	startedBlock = [aStartedBlock copy];
 }
 
-- (void) setCachedBlock: (ASIBasicBlock) aCachedBlock
+- (void) setCachedBlock: (ASIRequestBlock) aCachedBlock
 {
     [cachedBlock release];
     cachedBlock = [aCachedBlock copy];

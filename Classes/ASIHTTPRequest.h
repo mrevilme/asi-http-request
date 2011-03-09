@@ -79,6 +79,7 @@ typedef void (^ASIHeadersBlock)(NSDictionary *responseHeaders);
 typedef void (^ASISizeBlock)(long long size);
 typedef void (^ASIProgressBlock)(unsigned long long size, unsigned long long total);
 typedef void (^ASIDataBlock)(NSData *data);
+typedef void (^ASIRequestBlock)(ASIHTTPRequest *req);
 #endif
 
 @interface ASIHTTPRequest : NSOperation <NSCopying> {
@@ -502,7 +503,7 @@ typedef void (^ASIDataBlock)(NSData *data);
 	ASIBasicBlock startedBlock;
     
     //block to execute when sending cached response
-    ASIBasicBlock cachedBlock;
+    ASIRequestBlock cachedBlock;
 
 	//block to execute when headers are received
 	ASIHeadersBlock headersReceivedBlock;
@@ -552,7 +553,7 @@ typedef void (^ASIDataBlock)(NSData *data);
 
 #if NS_BLOCKS_AVAILABLE
 - (void)setStartedBlock:(ASIBasicBlock)aStartedBlock;
-- (void)setCachedBlock: (ASIBasicBlock) aCachedBlock;
+- (void)setCachedBlock: (ASIRequestBlock) aCachedBlock;
 - (void)setHeadersReceivedBlock:(ASIHeadersBlock)aReceivedBlock;
 - (void)setCompletionBlock:(ASIBasicBlock)aCompletionBlock;
 - (void)setFailedBlock:(ASIBasicBlock)aFailedBlock;
